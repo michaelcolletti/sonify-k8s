@@ -264,12 +264,15 @@ def colorize_line(text: str, color: str, use_color: bool = False) -> str:
     # Convert hex color to RGB
     hex_color = color.lstrip('#')
     if len(hex_color) != 6:
+        logger.warning(f"Invalid hex color format: {color}. Returning unmodified text.")
         return text  # Fallback if color is invalid
     r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
     return f"\033[38;2;{r};{g};{b}m{text}\033[0m"
 
 
-def sonify_k8s_metrics_colored(use_color: bool = False) -> None:
+def sonify_k8s_metrics_colored(use_color: Optional[bool] = None) -> None:
+    if use_color is None:
+        use_color = os.environ.get('SHOW_COLOR', 'false').lower() == 'true'
     logger.info("Starting Sonify K8s Metrics...")
 
     if USE_KUBE_CONFIG:
