@@ -3,3 +3,9 @@ typing
 random2
 pylint
 pytest
+black
+simpleaudio
+numpy
+click
+mido 
+python-rtmidi

@@ -9,15 +9,18 @@ format:
 	black *.py
 
 run:
-	python main.py
-
-run-uvicorn:
-	uvicorn main:app --reload
-
-killweb:
-	sudo killall uvicorn
+	python src/main.py
 
 lint:
-	pylint --disable=R,C src/main.py
+	-pylint --disable=R,C src/main.py
+
+clean:
+	rm -rf __pycache__/
+	rm -rf *.egg-info/
+	rm -rf .pytest_cache/
+	rm -rf .mypy_cache/
+	rm -rf .coverage
+	rm -rf coverage.xml
+	rm -rf htmlcov/
 
 all: install lint

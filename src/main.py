@@ -2,6 +2,8 @@ import time
 import random
 import logging
 import os
+import click
+
 from typing import Dict, List, Tuple, Optional
 
 # --- 1. Simplicity: Provide clear, maintainable solutions ---
@@ -245,5 +247,89 @@ def sonify_k8s_metrics() -> None:
 
 
 
+def colorize_line(text: str, color: str, use_color: bool = False) -> str:
+    """
+    Colorizes a line of text using ANSI escape codes if use_color is True.
+
+    Args:
+        text: The text to colorize.
+        color: The hex color code (e.g., "#FF0000").
+        use_color: Whether to apply color.
+
+    Returns:
+        The colorized text if use_color is True, otherwise the original text.
+    """
+    if not use_color:
+        return text
+    # Convert hex color to RGB
+    hex_color = color.lstrip('#')
+    if len(hex_color) != 6:
+        return text  # Fallback if color is invalid
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f"\033[38;2;{r};{g};{b}m{text}\033[0m"
+
+
+def sonify_k8s_metrics_colored(use_color: bool = False) -> None:
+    logger.info("Starting Sonify K8s Metrics...")
+
+    if USE_KUBE_CONFIG:
+        logger.info(f"Using KUBECONFIG from  ~/.kube/config")
+    else:
+        logger.info(f"Using K8s API URL: {K8S_API_URL}")
+
+    while True:
+        try:
+            for metric_name, metric_config in SOUND_MAP.items():
+                data = get_k8s_data(metric_name)
+                if data is None:
+                    logger.warning(f"Failed to get data for metric: {metric_name}")
+                    continue
+                metric_value, extra_data = data
+
+                notes_list = metric_config["notes"]
+                color_list = metric_config["colors"]
+                if metric_name in ["pod_status", "node_pressure"]:
+                    index = int(metric_value)
+                else:
+                    index = calculate_index(
+                        metric_value,
+                        len(notes_list),
+                        0,
+                        100 if metric_name not in ["http_latency", "errors_per_second", "replicas"]
+                        else (500 if metric_name == "http_latency" else (
+                            10 if metric_name == "errors_per_second" else 5))
+                    )
+
+                frequency, note_name = notes_list[index]
+                color = get_color(color_list, index)
+
+                play_note(frequency)
+                log_message = f"{metric_config['metric_name']}: {metric_value:.2f} {metric_config['unit']} | Note: {note_name} ({frequency} Hz) | Color: {color}"
+                if extra_data:
+                    log_message += f" | Extra: {extra_data}"
+
+                print(colorize_line(log_message, color, use_color=use_color))
+                logger.info(log_message)
+
+            time.sleep(POLL_INTERVAL)
+
+        except KeyboardInterrupt:
+            logger.info("Stopping Sonify...")
+            break
+        except Exception as e:
+            logger.error(f"An error occurred: {e}", exc_info=True)
+            time.sleep(POLL_INTERVAL)
+
+
+@click.command()
+@click.option('-c', '--color', is_flag=True, help='Show ANSI colors in output')
+def main(color):
+    """
+    Entry point for the CLI.
+    """
+    os.environ['SHOW_COLOR'] = 'true' if color else 'false'
+    sonify_k8s_metrics_colored(use_color=color)
+
+
 if __name__ == "__main__":
-    sonify_k8s_metrics()
+    main()
