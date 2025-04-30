@@ -9,3 +9,5 @@ numpy
 click
 mido 
 python-rtmidi
+fluidsynth
+
