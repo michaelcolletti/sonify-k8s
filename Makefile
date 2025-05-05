@@ -3,13 +3,13 @@ install:
 		pip install -r requirements.txt
 
 test:
-	python -m pytest -vv test_main.py
+	python -m pytest -vv test_*.py
 
 format:
-	black *.py
+	black *.py src/*.py
 
 run:
-	python src/main.py
+	python src/sonify_k8s.py
 
 lint:
 	-pylint --disable=R,C src/main.py

@@ -4,8 +4,8 @@ random2
 pylint
 pytest
 black
-simpleaudio
-numpy
-click
-mido 
-python-rtmidi
+simpleaudio>=1.0.4
+numpy>=1.20.0
+click>=8.0.0
+mido>=1.2.10
+python-rtmidi>=1.4.9
