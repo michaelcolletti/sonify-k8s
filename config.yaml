@@ -1,0 +1,52 @@
+# Sonify K8s Configuration File
+# This file contains customizable settings for the Sonify K8s application
+
+# Kubernetes Configuration
+kubernetes:
+  # Namespace to monitor (default: "default")
+  namespace: "default"
+
+  # Use kubeconfig file from ~/.kube/config (true/false)
+  # If false, will attempt to use in-cluster configuration
+  use_kubeconfig: true
+
+  # API URL (only used if not using kubeconfig or in-cluster config)
+  api_url: "http://localhost:8080"
+
+# Monitoring Configuration
+monitoring:
+  # Polling interval in seconds
+  poll_interval: 5
+
+  # Enable verbose logging
+  verbose: false
+
+  # Enable ANSI color output
+  use_color: true
+
+# Audio Configuration
+audio:
+  # Use MIDI for sound output (requires MIDI device)
+  use_midi: false
+
+  # Note duration in seconds
+  note_duration: 0.5
+
+  # Enable audio playback (set to false for silent mode)
+  enabled: true
+
+# Metrics Configuration
+# Define which metrics to monitor
+metrics:
+  enabled:
+    - cpu_usage
+    - memory_usage
+    - pod_status
+    - http_latency
+    - errors_per_second
+    - replicas
+    - node_pressure
+
+# Sound Mapping Customization
+# You can customize the frequency ranges and colors for each metric
+# (Advanced users only - see main.py for the full SOUND_MAP structure)
